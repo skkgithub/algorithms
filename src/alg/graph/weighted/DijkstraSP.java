@@ -1,92 +1,117 @@
 package alg.graph.weighted;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
-import lombok.Getter;
-import ds.graph.Graph2;
 import ds.graph.IEdge;
+import ds.graph.IGraph;
 import ds.graph.Vertex;
 
 /**
- * Dijkstra's algorithm to find shortest path between two vertices in a directed weighted graph
- * with non-negative edges.
+ * Disjkstra's Greedy Algorithm for finding single source shortest paths in weighted & directed graphs.
+ * Assumes graph has non-negative edge weights.
  * 
  * @author saikiran
  */
 public class DijkstraSP {
 
-	private Graph2 g;
-	private Map<Vertex,Double> dist;
-	private Map<Vertex,Boolean> explored;
-	private Map<Vertex,Double> weightedkeys;
-	@Getter
-	private Map<Vertex,Vertex> vertexDir;
+	private IGraph g;
 	
-	public DijkstraSP(Graph2 g){
+	public DijkstraSP(IGraph g){
 		this.g=g;
-		reset();
 	}
-	public void reset(){
-		dist=new HashMap<>();
-		weightedkeys=new HashMap<>();
-		explored=new HashMap<>();
-		vertexDir=new HashMap<>();
-	}
-	public double findSP(Vertex s,Vertex d){
-		reset();
-		explored.put(s, true);
-		dist.put(s, new Double(0));
-		PriorityQueue<WeightedVertex> pq=new PriorityQueue<>();
+	
+	public double shortestPathDistance(Vertex s, Vertex d){
+		Map<Vertex,Double> dist=new HashMap<>();
+		PriorityQueue<WeightedVertex> pq=new PriorityQueue<>(); //Min Heap with weighted vertices
 		pq.add(new WeightedVertex(s.getId(), 0));
-
-		while(true){
-			WeightedVertex wk=pq.poll();
-			if(wk==null)
+		dist.put(s, new Double(0));
+		for(int i=g.getNVertices()-1;i>=1;i--){
+			if(pq.isEmpty())
 				break;
-			Vertex v=new Vertex(wk.getId());
-			
-			explored.put(v, true);
-			dist.put(v, wk.getWeightedkey());
-			if(wk.getId()==d.getId()){
-				return wk.getWeightedkey();
-			}
-			
-			for(IEdge e:g.getAdjList().get(v)){
+			WeightedVertex wv=pq.poll();
+			Vertex v=new Vertex(wv.getId());
+			if(v.equals(d)) // destination reached with shortest path
+				break;
+			for(IEdge e:g.getAdjEdgesFrom(v)){
 				Vertex w=e.getOther(v);
-				if(explored.get(w)!=null && explored.get(w)){
+				if(dist.get(w)!=null && dist.get(w)<=dist.get(v)+e.getWeight())
 					continue;
-				}
-				if(weightedkeys.get(w)==null){
-					WeightedVertex wv=new WeightedVertex(w.getId(), dist.get(v)+e.getWeight());
-					pq.add(wv);
-					weightedkeys.put(w, wv.getWeightedkey());
-					vertexDir.put(w, v);
-					continue;
-				}
-				if(weightedkeys.get(w)!=null && weightedkeys.get(w)>dist.get(v)+e.getWeight()){
-					WeightedVertex wv=new WeightedVertex(w.getId(), dist.get(v)+e.getWeight());
-					pq.remove(wv);
-					pq.add(wv);
-					vertexDir.put(w, v);
-					weightedkeys.put(w, wv.getWeightedkey());
-				}
+				
+				if(dist.get(w)!=null && dist.get(w)>dist.get(v)+e.getWeight())
+					pq.remove(new WeightedVertex(w.getId(), dist.get(v)+e.getWeight()));
+				
+				pq.add(new WeightedVertex(w.getId(), dist.get(v)+e.getWeight()));
+				dist.put(w, dist.get(v)+e.getWeight());
 			}
 		}
-		
-		return Double.POSITIVE_INFINITY;
+		return dist.get(d)==null?Double.POSITIVE_INFINITY:dist.get(d);
 	}
 	
-	public void test(){
-		WeightedVertex wv1=new WeightedVertex(1, 10);
-		WeightedVertex wv2=new WeightedVertex(1, 5);
-		PriorityQueue<WeightedVertex> pq=new PriorityQueue<>();
-		pq.add(wv1);pq.add(wv2);
-		
-		System.out.println(pq.poll());
-		System.out.println(pq.poll());
+	public Queue<Vertex> shortestPath(Vertex s, Vertex d){
+		Map<Vertex,Vertex> path=new HashMap<>();
+		Map<Vertex,Double> dist=new HashMap<>();
+		PriorityQueue<WeightedVertex> pq=new PriorityQueue<>(); //Min Heap with weighted vertices
+		pq.add(new WeightedVertex(s.getId(), 0));
+		dist.put(s, new Double(0));
+		path.put(s, s);
+		for(int i=g.getNVertices()-1;i>=1;i--){
+			if(pq.isEmpty())
+				break;
+			WeightedVertex wv=pq.poll();
+			Vertex v=new Vertex(wv.getId());
+			if(v.equals(d)) // destination reached with shortest path
+				break;
+			for(IEdge e:g.getAdjEdgesFrom(v)){
+				Vertex w=e.getOther(v);
+				if(dist.get(w)!=null && dist.get(w)<=dist.get(v)+e.getWeight())
+					continue;
+				
+				if(dist.get(w)!=null && dist.get(w)>dist.get(v)+e.getWeight())
+					pq.remove(new WeightedVertex(w.getId(), dist.get(v)+e.getWeight()));
+				
+				pq.add(new WeightedVertex(w.getId(), dist.get(v)+e.getWeight()));
+				dist.put(w, dist.get(v)+e.getWeight());
+				path.put(w, v);
+			}
+		}
+		if(path.get(d)==null)
+			return null;
+		Queue<Vertex> pathqueue=new LinkedList<>();
+		Vertex p=d;
+		while(!p.equals(path.get(p))){
+			pathqueue.offer(p);
+			p=path.get(p);
+		}
+		pathqueue.offer(s);
+		return pathqueue;
 	}
 	
-	
+	public Map<Vertex, Double> singleSourceSP(Vertex s){
+		Map<Vertex,Double> dist=new HashMap<>();
+		PriorityQueue<WeightedVertex> pq=new PriorityQueue<>(); //Min Heap with weighted vertices
+		pq.add(new WeightedVertex(s.getId(), 0));
+		dist.put(s, new Double(0));
+		for(int i=g.getNVertices()-1;i>=1;i--){
+			if(pq.isEmpty())
+				break;
+			WeightedVertex wv=pq.poll();
+			Vertex v=new Vertex(wv.getId());
+			for(IEdge e:g.getAdjEdgesFrom(v)){
+				Vertex w=e.getOther(v);
+				if(dist.get(w)!=null && dist.get(w)<=dist.get(v)+e.getWeight())
+					continue;
+				
+				if(dist.get(w)!=null && dist.get(w)>dist.get(v)+e.getWeight())
+					pq.remove(new WeightedVertex(w.getId(), dist.get(v)+e.getWeight()));
+				
+				pq.add(new WeightedVertex(w.getId(), dist.get(v)+e.getWeight()));
+				dist.put(w, dist.get(v)+e.getWeight());
+			}
+		}
+		return dist;
+	}
 }
