@@ -1,7 +1,13 @@
 package alg.test;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -17,7 +23,7 @@ import ds.graph.util.GraphUtility;
 
 public class DFSTest {
 
-	public static void main(String[] args) throws FileNotFoundException{
+	public static void main(String[] args) throws NumberFormatException, IOException{
 	    //Scanner scanner = new Scanner(new File("C:\\Users\\saikiran\\Desktop\\testdata\\tinyG.txt"), "UTF-8");
 		//Scanner scanner = new Scanner(new File("C:\\Users\\saikiran\\Desktop\\testdata\\tinyDAG.txt"), "UTF-8");
         //scanner.useLocale(Locale.US);
@@ -37,11 +43,32 @@ public class DFSTest {
 		//testDFSCyclic();
 		//testDFSTopOrder();
 		//testSCCs();
-		testcourseps4();
+		//testcourseps4();
+		bufferReadGraph();
+	}
+	
+	public static void bufferReadGraph() throws NumberFormatException, IOException{
+		System.out.println(new Date());
+		IGraph grev=new Graph(true,false);
+		for(int i=1;i<=875714;i++){
+			grev.addVertex(new Vertex(i));
+		}
+		BufferedInputStream bis=new BufferedInputStream(new FileInputStream(new File("/Users/skk/Desktop/coursera/testdata/SCC.txt")));
+		while(bis.available()!=0){
+			Vertex v=new Vertex(bis.read());
+			Vertex w=new Vertex(bis.read());
+			grev.addEdge(w,v);
+		}
+		bis.close();
+		
+		System.out.println(new Date());
+		
+		System.out.println(grev.getNVertices());
+		System.out.println(grev.getNEdges());
 	}
 	public static void testcourseps4() throws FileNotFoundException{
 		System.out.println(new Date());
-		Scanner scanner = new Scanner(new File("C:\\Users\\saikiran\\Desktop\\testdata\\SCC.txt"), "UTF-8");
+		Scanner scanner = new Scanner(new File("/Users/skk/Desktop/coursera/testdata/SCC.txt"), "UTF-8");
 		IGraph grev=new Graph(true,false);
 		
 		for(int i=1;i<=875714;i++){
@@ -55,24 +82,25 @@ public class DFSTest {
 		scanner.close();
 		
 		System.out.println(new Date());
+		
 		System.out.println(grev.getNVertices());
 		System.out.println(grev.getNEdges());
-		DFS dfs=new DFS(grev);
-		Queue<Vertex> q = dfs.getTopologicalOrder();
-		System.out.println(q.peek());
-		System.out.println(new Date());
-		
-		List<IEdge> edges=grev.getEdges();grev=null;dfs=null;
-		IGraph g=new Graph(true,false);
-		for(int i=1;i<=875714;i++){
-			g.addVertex(new Vertex(i));
-		}
-		for(IEdge e:edges){
-			g.addEdge(e.getOther(e.getOne()), e.getOne());
-		}
-		dfs=new DFS(g);
-		System.out.println(dfs.findSCCs(q));
-		System.out.println(new Date());
+//		DFS dfs=new DFS(grev);
+//		Queue<Vertex> q = dfs.getTopologicalOrder();
+//		System.out.println(q.peek());
+//		System.out.println(new Date());
+//		
+//		List<IEdge> edges=grev.getEdges();grev=null;dfs=null;
+//		IGraph g=new Graph(true,false);
+//		for(int i=1;i<=875714;i++){
+//			g.addVertex(new Vertex(i));
+//		}
+//		for(IEdge e:edges){
+//			g.addEdge(e.getOther(e.getOne()), e.getOne());
+//		}
+//		dfs=new DFS(g);
+//		System.out.println(dfs.findSCCs(q));
+//		System.out.println(new Date());
 	}
 	public static void testSCCs(){
 		IGraph g=GraphUtility.getSampleSCCGraph();
