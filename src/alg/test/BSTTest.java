@@ -6,8 +6,8 @@ public class BSTTest {
 
 	public static void main(String[] args){
 		BST bst=new BST();
-		bst.insert(3);bst.insert(1);bst.insert(2);bst.insert(5);bst.insert(4);
-		
+		//bst.insert(3);bst.insert(1);bst.insert(2);bst.insert(5);bst.insert(4);
+		bst.insert(3);bst.insert(2);bst.insert(1);bst.insert(0);bst.insert(5);
 		//bst.inorder();
 		
 		//System.out.println(bst.search(1));
@@ -23,10 +23,12 @@ public class BSTTest {
 			//System.out.println(bst.successor(i));
 		}
 		
-		bst.delete(2);
-		bst.inorder();
-		System.out.println();
-		bst.delete(3);
-		bst.inorder();
+//		bst.delete(2);
+//		bst.inorder();
+//		System.out.println();
+//		bst.delete(3);
+//		bst.inorder();
+		
+		System.out.println(bst.isBalanced());
 	}
 }

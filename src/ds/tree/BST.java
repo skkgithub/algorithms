@@ -209,4 +209,29 @@ public class BST {
 		n.setSize(n.getSize()-1);
 		decreseSize(n.getParent());
 	}
+	
+	int llh=0,lhh=0;
+	public boolean isBalanced(){
+		if(root==null) return true;
+		traverseTrackHeight(root, 0);
+		System.out.println(lhh);
+		System.out.println(llh);
+		return lhh-llh<=1;
+	}
+	
+	private void traverseTrackHeight(Node n,int h){
+		if(n.getLeft()==null && n.getRight()==null){
+			updateHeightBounds(h);
+			return;
+		}
+		if(n.getLeft()!=null)	traverseTrackHeight(n.getLeft(), h+1);
+		if(n.getRight()!=null)	traverseTrackHeight(n.getRight(), h+1);
+	}
+	private void updateHeightBounds(int h){
+		if(lhh==0 && llh==0){
+			llh=h;lhh=h;
+		}
+		if(lhh<h)	lhh=h;
+		else if(llh>h)	llh=h;
+	}
 }

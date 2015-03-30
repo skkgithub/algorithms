@@ -23,7 +23,7 @@ public class WIS {
 		A[0]=0;A[1]=weights[0];
 		
 		for(int i=2;i<A.length;i++){
-			A[i]=A[i-1]>A[i-2]+weights[i-1]?A[i-1]:A[i-2]+weights[i-1];
+			A[i]=Math.max(A[i-1],A[i-2]+weights[i-1]);
 		}
 		
 		System.out.println(A[A.length-1]);
